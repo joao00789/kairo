@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="TouchJoystick2D" inherits="Node2D" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Joystick virtual multitoque para jogos 2D mobile.
+	</brief_description>
+	<description>
+		Joystick analógico na tela. No modo [constant MODE_FIXED] ele fica sempre no mesmo lugar; no modo [constant MODE_DYNAMIC] ele aparece onde o dedo tocar dentro de [member touch_area_radius]. Pode injetar ações do Input Map (veja [member action_left] etc.) e/ou ser lido por código com [method get_vector].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_vector" qualifiers="const">
+			<return type="Vector2" />
+			<description>
+				Direção atual com a zona morta aplicada e reescalada (comprimento de 0 a 1). Y negativo = para cima.
+			</description>
+		</method>
+		<method name="get_raw_vector" qualifiers="const">
+			<return type="Vector2" />
+			<description>
+				Deslocamento bruto do knob, sem zona morta.
+			</description>
+		</method>
+		<method name="get_strength" qualifiers="const">
+			<return type="float" />
+			<description>
+				Comprimento de [method get_vector].
+			</description>
+		</method>
+		<method name="is_pressed" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Retorna [code]true[/code] enquanto um dedo controla o joystick.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="action_down" type="StringName" setter="set_action_down" getter="get_action_down" default="&amp;&quot;&quot;">
+			Ação do Input Map acionada ao puxar para baixo.
+		</member>
+		<member name="action_left" type="StringName" setter="set_action_left" getter="get_action_left" default="&amp;&quot;&quot;">
+			Ação do Input Map acionada ao puxar para a esquerda.
+		</member>
+		<member name="action_right" type="StringName" setter="set_action_right" getter="get_action_right" default="&amp;&quot;&quot;">
+			Ação do Input Map acionada ao puxar para a direita.
+		</member>
+		<member name="action_up" type="StringName" setter="set_action_up" getter="get_action_up" default="&amp;&quot;&quot;">
+			Ação do Input Map acionada ao puxar para cima.
+		</member>
+		<member name="base_color" type="Color" setter="set_base_color" getter="get_base_color" default="Color(1, 1, 1, 0.2)">
+			Cor da base.
+		</member>
+		<member name="base_radius" type="float" setter="set_base_radius" getter="get_base_radius" default="90.0">
+			Raio da base, em pixels. Também é o deslocamento que vale força 1.
+		</member>
+		<member name="clamp_to_base" type="bool" setter="set_clamp_to_base" getter="is_clamp_to_base" default="true">
+			Se [code]true[/code], o knob não sai da base.
+		</member>
+		<member name="deadzone" type="float" setter="set_deadzone" getter="get_deadzone" default="0.15">
+			Zona morta radial (0 a 0.95).
+		</member>
+		<member name="knob_color" type="Color" setter="set_knob_color" getter="get_knob_color" default="Color(1, 1, 1, 0.55)">
+			Cor do knob.
+		</member>
+		<member name="knob_radius" type="float" setter="set_knob_radius" getter="get_knob_radius" default="38.0">
+			Raio do knob, em pixels.
+		</member>
+		<member name="mode" type="int" setter="set_mode" getter="get_mode" enum="TouchJoystick2D.JoystickMode" default="0">
+			Modo fixo ou dinâmico.
+		</member>
+		<member name="touch_area_radius" type="float" setter="set_touch_area_radius" getter="get_touch_area_radius" default="160.0">
+			Raio da área que aceita o toque inicial no modo dinâmico.
+		</member>
+		<member name="visibility_mode" type="int" setter="set_visibility_mode" getter="get_visibility_mode" enum="TouchJoystick2D.VisibilityMode" default="0">
+			Se o joystick aparece sempre ou só em dispositivos com tela de toque.
+		</member>
+	</members>
+	<signals>
+		<signal name="pressed">
+			<description>
+				Emitido quando um dedo começa a controlar o joystick.
+			</description>
+		</signal>
+		<signal name="released">
+			<description>
+				Emitido quando o dedo é solto.
+			</description>
+		</signal>
+		<signal name="vector_changed">
+			<param index="0" name="vector" type="Vector2" />
+			<description>
+				Emitido quando o valor de [method get_vector] muda.
+			</description>
+		</signal>
+	</signals>
+	<constants>
+		<constant name="MODE_FIXED" value="0" enum="JoystickMode">
+			O joystick fica sempre na posição do nó.
+		</constant>
+		<constant name="MODE_DYNAMIC" value="1" enum="JoystickMode">
+			O joystick aparece onde o dedo tocar.
+		</constant>
+		<constant name="VISIBILITY_ALWAYS" value="0" enum="VisibilityMode">
+			Sempre visível.
+		</constant>
+		<constant name="VISIBILITY_TOUCHSCREEN_ONLY" value="1" enum="VisibilityMode">
+			Visível somente se houver tela de toque.
+		</constant>
+	</constants>
+</class>

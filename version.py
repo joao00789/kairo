@@ -1,0 +1,9 @@
+short_name = "nova2d"
+name = "Nova2D Engine"
+major = 4
+minor = 8
+patch = 0
+status = "beta"
+module_config = ""
+website = "https://godotengine.org"
+docs = "latest"
