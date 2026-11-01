@@ -355,6 +355,24 @@ void EditorFeatureProfileManager::_notification(int p_what) {
 					current.unref();
 				}
 			}
+			if (current_profile.is_empty()) {
+				current_profile = "Nova2D 2D Only";
+				current.instantiate();
+				current->set_disable_feature(EditorFeatureProfile::FEATURE_3D, true);
+				current->set_disable_class("Node3D", true);
+
+				const String profile_path = EditorPaths::get_singleton()->get_feature_profiles_dir().path_join(current_profile + ".profile");
+				if (FileAccess::exists(profile_path)) {
+					Error err = current->load_from_file(profile_path);
+					ERR_FAIL_COND_MSG(err != OK, "Error loading default Nova2D feature profile: " + profile_path);
+				} else {
+					Error err = current->save_to_file(profile_path);
+					ERR_FAIL_COND_MSG(err != OK, "Error saving default Nova2D feature profile: " + profile_path);
+				}
+
+				EditorSettings::get_singleton()->set("_default_feature_profile", current_profile);
+				EditorSettings::get_singleton()->save();
+			}
 			_update_profile_list(current_profile);
 		} break;
 

@@ -8,7 +8,7 @@
 - `scene/2d` (Sprite2D, AnimatedSprite2D, Camera2D, Light2D, CPUParticles2D, Parallax, Skeleton2D...), `scene/2d/physics` (CharacterBody2D, Area2D, TouchScreenButton...), `modules/tilemap`, `modules/godot_physics_2d`, `modules/navigation_2d`, `scene/gui` (UI), `servers/rendering` (renderer GLES3 + Vulkan).
 
 ## Descobertas importantes
-1. **O editor não compila com `disable_3d`** (SConstruct, ~linha 1066: "só para export templates"). Então: o *template de exportação* (o jogo final) fica 2D-puro e pequeno; o *editor* ainda contém 3D, que escondemos/removemos da interface em etapas (ver ROADMAP).
+1. **O editor não compila com `disable_3d`** (SConstruct restringe a opção aos templates de exportação). O template de exportação Android desativa 3D; no editor, o perfil padrão Nova2D oculta a área de trabalho 3D e a criação de nós `Node3D`. O código upstream de 3D continua presente para preservar tipos e serviços compartilhados pelo engine.
 2. **Já existe editor rodando no Android** em `platform/android/java/editor`. Dá para ter a engine criando jogos direto no celular/tablet (`scripts/build_editor_android.sh`, experimental).
 3. **Módulos são o caminho certo para nossas melhorias**: cada pasta em `modules/` tem `config.py` + `SCsub` + `register_types.cpp`. Não mexemos no núcleo, então atualizar o Godot upstream fica barato.
 4. Há ~19 módulos 3D/XR/extras que não servem para 2D (csg, gridmap, gltf, fbx, openxr, jolt_physics etc.); o perfil `android_template_2d.py` já os desliga.

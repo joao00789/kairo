@@ -35,7 +35,7 @@
 #include "editor/docks/editor_dock_manager.h"
 #include "editor/editor_node.h"
 #include "editor/plugins/editor_plugin.h"
-#include "editor/scene/3d/node_3d_editor_plugin.h"
+#include "editor/scene/canvas_item_editor_plugin.h"
 #include "editor/script/script_editor_plugin.h"
 #include "editor/settings/editor_settings.h"
 #include "editor/themes/editor_scale.h"
@@ -102,7 +102,7 @@ void EditorMainScreen::_notification(int p_what) {
 
 			for (int i = 0; i < get_tab_count(); i++) {
 				EditorDock *dock = get_dock(i);
-				if (dock == Node3DEditor::get_singleton()) {
+				if (dock == CanvasItemEditor::get_singleton()) {
 					dock->make_visible();
 					break;
 				}

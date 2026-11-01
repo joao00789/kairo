@@ -29,18 +29,23 @@ jobs:
             scons-flags: >-
               arch=arm64
               production=yes
+              module_nova2d_enabled=yes
 
           - name: Template arm32 (target=template_debug, arch=arm32)
             cache-name: android-template-arm32
             target: template_debug
             instrumented_tests: false
-            scons-flags: arch=arm32
+            scons-flags: >-
+              arch=arm32
+              profile=nova2d/engine/android_template_2d.py
 
           - name: Template arm64 (target=template_debug, arch=arm64)
             cache-name: android-template-arm64
             target: template_debug
             instrumented_tests: true
-            scons-flags: arch=arm64
+            scons-flags: >-
+              arch=arm64
+              profile=nova2d/engine/android_template_2d.py
 
     steps:
       - name: Checkout

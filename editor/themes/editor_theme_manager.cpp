@@ -342,7 +342,7 @@ EditorThemeManager::ThemeConfiguration EditorThemeManager::_create_theme_config(
 				preset_base_color = Color(0.21, 0.24, 0.29);
 				preset_icon_saturation = 1;
 			} else if (config.preset == "Gray") {
-				preset_accent_color = Color(0.44, 0.73, 0.98);
+				preset_accent_color = Color(0.62, 0.62, 0.62);
 				preset_base_color = Color(0.24, 0.24, 0.24);
 			} else if (config.preset == "Light") {
 				preset_accent_color = Color(0.18, 0.50, 1.00);
@@ -358,7 +358,7 @@ EditorThemeManager::ThemeConfiguration EditorThemeManager::_create_theme_config(
 				preset_base_color = Color(0.89, 0.86, 0.79);
 				preset_contrast = light_contrast;
 			} else { // Default
-				preset_accent_color = Color(0.337, 0.62, 1.0);
+				preset_accent_color = Color(0.62, 0.62, 0.62);
 				preset_base_color = Color(0.161, 0.161, 0.161);
 			}
 
