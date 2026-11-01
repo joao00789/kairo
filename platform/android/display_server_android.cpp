@@ -59,7 +59,9 @@
 
 #if defined(RD_ENABLED)
 static RenderingContextDriver *rendering_context_global = nullptr;
+#ifdef VULKAN_ENABLED
 static bool rendering_context_global_checked = false;
+#endif
 #endif
 
 DisplayServerAndroid *DisplayServerAndroid::get_singleton() {
