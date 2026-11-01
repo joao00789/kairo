@@ -53,11 +53,23 @@ jobs:
       - name: Python e SCons
         uses: ./.github/actions/godot-deps
 
+      - name: Download Swappy
+        id: swappy_sdk
+        shell: sh
+        run: |
+          if python ./misc/scripts/install_swappy_android.py; then
+            echo "SWAPPY_ENABLED=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Swappy SDK installation failed; building without frame pacing."
+            echo "SWAPPY_ENABLED=no" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Compilar templates (release + debug), 2D apenas
         run: |
           for T in template_release template_debug; do
             scons platform=android target=$T arch=arm64 \
               profile=kairo/engine/android_template_2d.py \
+              profiler=none swappy=${{ steps.swappy_sdk.outputs.SWAPPY_ENABLED }} \
               accesskit=no -j"$(nproc)"
           done
 
