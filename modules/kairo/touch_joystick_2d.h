@@ -30,6 +30,8 @@ private:
 	float touch_area_radius = 160.0f;
 	float deadzone = 0.15f;
 	bool clamp_to_base = true;
+	bool show_idle_hint = true;
+	bool consume_input = true;
 	Color base_color = Color(1, 1, 1, 0.20);
 	Color knob_color = Color(1, 1, 1, 0.55);
 
@@ -46,6 +48,7 @@ private:
 	virtual void input(const Ref<InputEvent> &p_event) override;
 
 	bool _is_in_touch_area(const Point2 &p_global_canvas_point) const;
+	void _consume_event();
 	void _begin(int p_index, const Point2 &p_pos);
 	void _update(const Point2 &p_pos);
 	void _end(bool p_exiting = false);
@@ -77,6 +80,10 @@ public:
 	float get_deadzone() const;
 	void set_clamp_to_base(bool p_clamp);
 	bool is_clamp_to_base() const;
+	void set_show_idle_hint(bool p_show);
+	bool is_show_idle_hint() const;
+	void set_consume_input(bool p_consume);
+	bool is_consume_input() const;
 	void set_base_color(const Color &p_color);
 	Color get_base_color() const;
 	void set_knob_color(const Color &p_color);

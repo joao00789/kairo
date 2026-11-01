@@ -141,6 +141,7 @@ private:
 
 	real_t grab_distance = 1;
 	real_t scale = 1;
+	real_t min_handle_grab_radius = 0;
 	real_t zoom = 1;
 	Point2 view_offset;
 	Viewport *viewport = nullptr;
@@ -257,6 +258,8 @@ public:
 	void set_drag_type(DragType p_type) { drag_type = p_type; }
 	void set_grab_distance(const real_t p_distance) { grab_distance = p_distance; }
 	void set_scale(const real_t p_scale) { scale = p_scale; }
+	// KAIRO: raio mínimo (em pixels) para agarrar os handles de redimensionar. Útil em telas de toque.
+	void set_min_handle_grab_radius(const real_t p_radius) { min_handle_grab_radius = p_radius; }
 	void set_zoom(const real_t p_zoom) { zoom = p_zoom; }
 	void set_view_offset(const Point2 p_offset) { view_offset = p_offset; }
 	void set_viewport(Viewport *p_viewport) { viewport = p_viewport; }

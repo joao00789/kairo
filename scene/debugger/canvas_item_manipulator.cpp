@@ -571,7 +571,7 @@ bool CanvasItemManipulator::_gui_input_resize(const Ref<InputEvent> &p_event) {
 				};
 
 				DragType resize_drag = DRAG_NONE;
-				real_t radius = (RESIZE_HANDLE_DIAMETER / 2) * 1.5 * scale;
+				real_t radius = MAX((RESIZE_HANDLE_DIAMETER / 2) * 1.5 * scale, min_handle_grab_radius);
 
 				for (int i = 0; i < 4; i++) {
 					int prev = (i + 3) % 4;

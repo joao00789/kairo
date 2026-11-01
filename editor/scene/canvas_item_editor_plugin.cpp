@@ -86,6 +86,7 @@
 #include "scene/resources/gradient.h"
 #include "scene/resources/packed_scene.h"
 #include "scene/resources/style_box_texture.h"
+#include "servers/display/display_server.h"
 #include "servers/rendering/rendering_server.h"
 
 class SnapDialog : public ConfirmationDialog {
@@ -2601,6 +2602,19 @@ void CanvasItemEditor::_update_editor_settings() {
 	ci_manipulator->set_ruler_width(MAX(ruler_width_unscaled * EDSCALE, ruler_font_size * 2.0));
 
 	ci_manipulator->set_grab_distance(EDITOR_GET("editors/polygon_editor/point_grab_radius"));
+
+	// KAIRO: a área de captura dos handles acompanha o tamanho desenhado do ícone (que cresce no toque)
+	// e nunca fica menor que um alvo confortável para o dedo.
+	{
+		real_t handle_radius = 0;
+		if (select_handle.is_valid()) {
+			handle_radius = select_handle->get_size().width / 2 * 1.5;
+		}
+		if (DisplayServer::get_singleton()->is_touchscreen_available()) {
+			handle_radius = MAX(handle_radius, 16 * EDSCALE);
+		}
+		ci_manipulator->set_min_handle_grab_radius(handle_radius);
+	}
 	ci_manipulator->set_shortcut(CanvasItemManipulator::SHORTCUT_CANCEL_TRANSFORM, ED_GET_SHORTCUT("canvas_item_editor/cancel_transform"));
 
 	resample_delay = EDITOR_GET("editors/2d/auto_resample_delay");

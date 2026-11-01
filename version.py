@@ -1,5 +1,5 @@
-short_name = "nova2d"
-name = "Nova2D Engine"
+short_name = "kairo"
+name = "KAIRO"
 major = 4
 minor = 8
 patch = 0

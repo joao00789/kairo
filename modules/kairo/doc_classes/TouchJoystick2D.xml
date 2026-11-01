@@ -56,6 +56,9 @@
 		<member name="clamp_to_base" type="bool" setter="set_clamp_to_base" getter="is_clamp_to_base" default="true">
 			Se [code]true[/code], o knob não sai da base.
 		</member>
+		<member name="consume_input" type="bool" setter="set_consume_input" getter="is_consume_input" default="true">
+			Se [code]true[/code], o toque usado pelo joystick é marcado como tratado e não chega a botões ou UI que estejam embaixo dele.
+		</member>
 		<member name="deadzone" type="float" setter="set_deadzone" getter="get_deadzone" default="0.15">
 			Zona morta radial (0 a 0.95).
 		</member>
@@ -67,6 +70,9 @@
 		</member>
 		<member name="mode" type="int" setter="set_mode" getter="get_mode" enum="TouchJoystick2D.JoystickMode" default="0">
 			Modo fixo ou dinâmico.
+		</member>
+		<member name="show_idle_hint" type="bool" setter="set_show_idle_hint" getter="is_show_idle_hint" default="true">
+			No modo dinâmico, desenha um anel discreto mostrando onde o jogador pode tocar enquanto o joystick está parado.
 		</member>
 		<member name="touch_area_radius" type="float" setter="set_touch_area_radius" getter="get_touch_area_radius" default="160.0">
 			Raio da área que aceita o toque inicial no modo dinâmico.

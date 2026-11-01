@@ -1,5 +1,5 @@
 def can_build(env, platform):
-    # Nova2D só faz sentido com o 2D habilitado.
+    # KAIRO só faz sentido com o 2D habilitado.
     return not env["disable_2d"]
 
 

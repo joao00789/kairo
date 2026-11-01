@@ -1,6 +1,6 @@
 # Opções SCons para o TEMPLATE de exportação Android 2D (jogo final, leve).
 # Uso (na raiz do código-fonte):
-#   scons platform=android target=template_release arch=arm64 profile=nova2d/engine/android_template_2d.py
+#   scons platform=android target=template_release arch=arm64 profile=kairo/engine/android_template_2d.py
 # Arquivos de perfil são executados pelo SCons, então aqui só valores simples.
 
 # Remove tudo que é 3D/XR (só vale para templates; o editor não aceita estes flags).
@@ -44,4 +44,4 @@ module_upnp_enabled = "no"
 module_camera_enabled = "no"
 module_webrtc_enabled = "no"
 
-module_nova2d_enabled = "yes"
+module_kairo_enabled = "yes"

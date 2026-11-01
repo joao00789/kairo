@@ -4,6 +4,7 @@
 #include "core/input/input.h"
 #include "core/input/input_event.h"
 #include "core/object/class_db.h"
+#include "scene/main/viewport.h"
 #include "servers/display/display_server.h"
 
 void TouchJoystick2D::_notification(int p_what) {
@@ -16,6 +17,12 @@ void TouchJoystick2D::_notification(int p_what) {
 			// Em modo dinâmico, só desenha enquanto o dedo está na tela (ou no editor).
 			const bool editor = Engine::get_singleton()->is_editor_hint();
 			if (mode == MODE_DYNAMIC && finger == -1 && !editor) {
+				if (show_idle_hint) {
+					// Anel discreto mostrando onde o jogador pode encostar o dedo.
+					Color hint = base_color;
+					hint.a *= 0.6f;
+					draw_arc(Point2(), touch_area_radius, 0, Math::TAU, 64, hint, 2.0, true);
+				}
 				return;
 			}
 
@@ -83,12 +90,22 @@ void TouchJoystick2D::input(const Ref<InputEvent> &p_event) {
 		if (st->is_pressed()) {
 			if (finger == -1 && _is_in_touch_area(st->get_position())) {
 				_begin(st->get_index(), st->get_position());
+				_consume_event();
 			}
 		} else if (st->get_index() == finger) {
 			_end();
+			_consume_event();
 		}
 	} else if (sd && sd->get_index() == finger) {
 		_update(sd->get_position());
+		_consume_event();
+	}
+}
+
+void TouchJoystick2D::_consume_event() {
+	// Evita que o mesmo toque também acione botões/UI que estejam embaixo do joystick.
+	if (consume_input && is_inside_tree() && get_viewport()) {
+		get_viewport()->set_input_as_handled();
 	}
 }
 
@@ -296,6 +313,23 @@ bool TouchJoystick2D::is_clamp_to_base() const {
 	return clamp_to_base;
 }
 
+void TouchJoystick2D::set_show_idle_hint(bool p_show) {
+	show_idle_hint = p_show;
+	queue_redraw();
+}
+
+bool TouchJoystick2D::is_show_idle_hint() const {
+	return show_idle_hint;
+}
+
+void TouchJoystick2D::set_consume_input(bool p_consume) {
+	consume_input = p_consume;
+}
+
+bool TouchJoystick2D::is_consume_input() const {
+	return consume_input;
+}
+
 void TouchJoystick2D::set_base_color(const Color &p_color) {
 	base_color = p_color;
 	queue_redraw();
@@ -367,6 +401,10 @@ void TouchJoystick2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_deadzone"), &TouchJoystick2D::get_deadzone);
 	ClassDB::bind_method(D_METHOD("set_clamp_to_base", "enabled"), &TouchJoystick2D::set_clamp_to_base);
 	ClassDB::bind_method(D_METHOD("is_clamp_to_base"), &TouchJoystick2D::is_clamp_to_base);
+	ClassDB::bind_method(D_METHOD("set_show_idle_hint", "enabled"), &TouchJoystick2D::set_show_idle_hint);
+	ClassDB::bind_method(D_METHOD("is_show_idle_hint"), &TouchJoystick2D::is_show_idle_hint);
+	ClassDB::bind_method(D_METHOD("set_consume_input", "enabled"), &TouchJoystick2D::set_consume_input);
+	ClassDB::bind_method(D_METHOD("is_consume_input"), &TouchJoystick2D::is_consume_input);
 	ClassDB::bind_method(D_METHOD("set_base_color", "color"), &TouchJoystick2D::set_base_color);
 	ClassDB::bind_method(D_METHOD("get_base_color"), &TouchJoystick2D::get_base_color);
 	ClassDB::bind_method(D_METHOD("set_knob_color", "color"), &TouchJoystick2D::set_knob_color);
@@ -394,6 +432,8 @@ void TouchJoystick2D::_bind_methods() {
 	ADD_GROUP("Behavior", "");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "deadzone", PROPERTY_HINT_RANGE, "0,0.95,0.01"), "set_deadzone", "get_deadzone");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "clamp_to_base"), "set_clamp_to_base", "is_clamp_to_base");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_idle_hint"), "set_show_idle_hint", "is_show_idle_hint");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "consume_input"), "set_consume_input", "is_consume_input");
 
 	ADD_GROUP("Input Actions", "action_");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "action_left"), "set_action_left", "get_action_left");

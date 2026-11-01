@@ -355,22 +355,34 @@ void EditorFeatureProfileManager::_notification(int p_what) {
 					current.unref();
 				}
 			}
-			if (current_profile.is_empty()) {
-				current_profile = "Nova2D 2D Only";
-				current.instantiate();
-				current->set_disable_feature(EditorFeatureProfile::FEATURE_3D, true);
-				current->set_disable_class("Node3D", true);
+			// KAIRO: na PRIMEIRA execução, ativa o perfil "KAIRO 2D" (esconde o 3D).
+			// A flag evita reativar o perfil à força se a pessoa o desligar de propósito.
+			if (current_profile.is_empty() && !EditorSettings::get_singleton()->has_setting("_kairo_default_profile_applied")) {
+				const String kairo_profile = "KAIRO 2D";
+				const String profile_path = EditorPaths::get_singleton()->get_feature_profiles_dir().path_join(kairo_profile + ".profile");
 
-				const String profile_path = EditorPaths::get_singleton()->get_feature_profiles_dir().path_join(current_profile + ".profile");
+				Ref<EditorFeatureProfile> kairo_current;
+				kairo_current.instantiate();
 				if (FileAccess::exists(profile_path)) {
-					Error err = current->load_from_file(profile_path);
-					ERR_FAIL_COND_MSG(err != OK, "Error loading default Nova2D feature profile: " + profile_path);
+					if (kairo_current->load_from_file(profile_path) != OK) {
+						ERR_PRINT("Error loading default KAIRO feature profile: " + profile_path);
+						kairo_current.unref();
+					}
 				} else {
-					Error err = current->save_to_file(profile_path);
-					ERR_FAIL_COND_MSG(err != OK, "Error saving default Nova2D feature profile: " + profile_path);
+					kairo_current->set_disable_feature(EditorFeatureProfile::FEATURE_3D, true);
+					kairo_current->set_disable_class("Node3D", true);
+					if (kairo_current->save_to_file(profile_path) != OK) {
+						ERR_PRINT("Error saving default KAIRO feature profile: " + profile_path);
+						kairo_current.unref();
+					}
 				}
 
-				EditorSettings::get_singleton()->set("_default_feature_profile", current_profile);
+				if (kairo_current.is_valid()) {
+					current = kairo_current;
+					current_profile = kairo_profile;
+					EditorSettings::get_singleton()->set("_default_feature_profile", current_profile);
+				}
+				EditorSettings::get_singleton()->set("_kairo_default_profile_applied", true);
 				EditorSettings::get_singleton()->save();
 			}
 			_update_profile_list(current_profile);
