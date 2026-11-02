@@ -43,6 +43,7 @@ jobs:
           test -s "$arm64_apk"
           test -s "$x86_64_apk"
           mv "$x86_64_apk" release-assets/android_editor_builds/android_editor-android-x86_64-debug.apk
+          x86_64_apk="release-assets/android_editor_builds/android_editor-android-x86_64-debug.apk"
 
           if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release create "$RELEASE_TAG" \
