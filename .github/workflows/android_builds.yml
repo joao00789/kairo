@@ -26,8 +26,19 @@ jobs:
             cache-name: android-editor
             target: editor
             instrumented_tests: true
+            build_xr_editor: true
             scons-flags: >-
               arch=arm64
+              production=yes
+              module_kairo_enabled=yes
+
+          - name: Editor x86_64 (target=editor)
+            cache-name: android-editor-x86_64
+            target: editor
+            instrumented_tests: false
+            build_xr_editor: false
+            scons-flags: >-
+              arch=x86_64
               production=yes
               module_kairo_enabled=yes
 
@@ -127,10 +138,16 @@ jobs:
         run: |
           cd platform/android/java
           ./gradlew generateGodotEditor
+          cd ../../..
+          ls -l bin/android_editor_builds/
+
+      - name: Generate Horizon OS and PICO OS editors
+        if: matrix.target == 'editor' && matrix.build_xr_editor
+        run: |
+          cd platform/android/java
           ./gradlew generateGodotHorizonOSEditor
           ./gradlew generateGodotPicoOSEditor
           cd ../../..
-          ls -l bin/android_editor_builds/
 
           # Separate different editors for multiple artifacts
           mkdir horizonos
@@ -144,14 +161,14 @@ jobs:
           name: ${{ matrix.cache-name }}
 
       - name: Upload artifact (Horizon OS)
-        if: matrix.target == 'editor'
+        if: matrix.target == 'editor' && matrix.build_xr_editor
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}-horizonos
           path: horizonos
 
       - name: Upload artifact (PICO OS)
-        if: matrix.target == 'editor'
+        if: matrix.target == 'editor' && matrix.build_xr_editor
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}-picoos
