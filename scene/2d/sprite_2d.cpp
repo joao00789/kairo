@@ -158,6 +158,12 @@ void Sprite2D::_notification(int p_what) {
 
 		case NOTIFICATION_DRAW: {
 			if (texture.is_null()) {
+				if (Engine::get_singleton()->is_editor_hint()) {
+					const Color placeholder_color(0.61, 0.53, 0.91, 0.9);
+					draw_rect(Rect2(-8, -8, 16, 16), placeholder_color, false, 1.5);
+					draw_line(Point2(-8, -8), Point2(8, 8), placeholder_color, 1.5);
+					draw_line(Point2(8, -8), Point2(-8, 8), placeholder_color, 1.5);
+				}
 				return;
 			}
 

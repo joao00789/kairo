@@ -248,6 +248,8 @@ private:
 	Button *move_button = nullptr;
 	Button *scene_paint_button = nullptr;
 	Button *scale_button = nullptr;
+	Button *scale_decrease_button = nullptr;
+	Button *scale_increase_button = nullptr;
 	Button *rotate_button = nullptr;
 
 	Button *list_select_button = nullptr;
@@ -349,6 +351,7 @@ private:
 	void _prepare_grid_menu();
 	void _on_grid_menu_id_pressed(int p_id);
 	void _reset_transform(TransformType p_type);
+	void _scale_selection(real_t p_factor);
 	void _update_oversampling();
 
 public:

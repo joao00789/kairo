@@ -1035,6 +1035,48 @@ void CanvasItemEditor::_reset_transform(TransformType p_type) {
 	undo_redo->commit_action();
 }
 
+void CanvasItemEditor::_scale_selection(real_t p_factor) {
+	List<Node *> selection = editor_selection->get_top_selected_node_list();
+	auto get_scaled_value = [p_factor](Vector2 p_original_scale) {
+		Vector2 scaled_value = p_original_scale * p_factor;
+		for (int axis = 0; axis < 2; axis++) {
+			if (p_factor > 1.0 && Math::abs(p_original_scale[axis]) <= CMP_EPSILON) {
+				scaled_value[axis] = 0.1;
+			}
+		}
+		return scaled_value;
+	};
+	bool has_scale_to_change = false;
+	for (Node *node : selection) {
+		if (Node2D *node_2d = Object::cast_to<Node2D>(node)) {
+			has_scale_to_change = node_2d->get_scale() != get_scaled_value(node_2d->get_scale());
+		} else if (Control *control = Object::cast_to<Control>(node)) {
+			has_scale_to_change = control->get_scale() != get_scaled_value(control->get_scale());
+		}
+		if (has_scale_to_change) {
+			break;
+		}
+	}
+	if (!has_scale_to_change) {
+		return;
+	}
+
+	EditorUndoRedoManager *undo_redo = EditorUndoRedoManager::get_singleton();
+	undo_redo->create_action(p_factor > 1.0 ? TTR("Increase Scale") : TTR("Decrease Scale"));
+	for (Node *node : selection) {
+		if (Node2D *node_2d = Object::cast_to<Node2D>(node)) {
+			Vector2 original_scale = node_2d->get_scale();
+			undo_redo->add_do_method(node_2d, "set_scale", get_scaled_value(original_scale));
+			undo_redo->add_undo_method(node_2d, "set_scale", original_scale);
+		} else if (Control *control = Object::cast_to<Control>(node)) {
+			Vector2 original_scale = control->get_scale();
+			undo_redo->add_do_method(control, "set_scale", get_scaled_value(original_scale));
+			undo_redo->add_undo_method(control, "set_scale", original_scale);
+		}
+	}
+	undo_redo->commit_action();
+}
+
 void CanvasItemEditor::_switch_theme_preview(int p_mode) {
 	view_menu->get_popup()->hide();
 
@@ -2557,6 +2599,8 @@ void CanvasItemEditor::_update_editor_settings() {
 	list_select_button->set_button_icon(get_editor_theme_icon(SNAME("ListSelect")));
 	move_button->set_button_icon(get_editor_theme_icon(SNAME("ToolMove")));
 	scale_button->set_button_icon(get_editor_theme_icon(SNAME("ToolScale")));
+	scale_decrease_button->set_button_icon(get_editor_theme_icon(SNAME("Remove")));
+	scale_increase_button->set_button_icon(get_editor_theme_icon(SNAME("Add")));
 	rotate_button->set_button_icon(get_editor_theme_icon(SNAME("ToolRotate")));
 	local_space_button->set_button_icon(get_editor_theme_icon(SNAME("Object")));
 	smart_snap_button->set_button_icon(get_editor_theme_icon(SNAME("Snap")));
@@ -4160,6 +4204,20 @@ CanvasItemEditor::CanvasItemEditor() {
 	scale_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/scale_mode", TTRC("Scale Mode"), Key::R, true));
 	scale_button->set_shortcut_context(this);
 	scale_button->set_accessibility_name(TTRC("Scale Mode"));
+
+	scale_decrease_button = memnew(Button);
+	scale_decrease_button->set_theme_type_variation(SceneStringName(FlatButton));
+	input_hbox->add_child(scale_decrease_button);
+	scale_decrease_button->connect(SceneStringName(pressed), callable_mp(this, &CanvasItemEditor::_scale_selection).bind(0.9));
+	scale_decrease_button->set_accessibility_name(TTRC("Decrease Selected Scale"));
+	scale_decrease_button->set_tooltip_text(TTR("Decrease selected scale by 10%"));
+
+	scale_increase_button = memnew(Button);
+	scale_increase_button->set_theme_type_variation(SceneStringName(FlatButton));
+	input_hbox->add_child(scale_increase_button);
+	scale_increase_button->connect(SceneStringName(pressed), callable_mp(this, &CanvasItemEditor::_scale_selection).bind(1.1));
+	scale_increase_button->set_accessibility_name(TTRC("Increase Selected Scale"));
+	scale_increase_button->set_tooltip_text(TTR("Increase selected scale by 10%"));
 
 	vsep = memnew(VSeparator);
 	vsep->set_theme_type_variation("VSeparatorButtonGroup");

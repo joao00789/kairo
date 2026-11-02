@@ -341,22 +341,63 @@ bool CanvasItemManipulator::_gui_input_scale(const Ref<InputEvent> &p_event) {
 
 				Size2 ci_scale = ci->_edit_get_scale();
 				Size2 original_scale = ci_scale;
-				real_t ratio = ci_scale.y / ci_scale.x;
 				if (drag_type == DRAG_SCALE_BOTH) {
-					Size2 scale_factor = drag_to_local / drag_from_local;
 					if (uniform) {
-						ci_scale *= (scale_factor.x + scale_factor.y) / 2.0;
-					} else {
+						real_t start_distance = drag_from_local.length();
+						real_t scale_factor = 1.0;
+						if (start_distance > CMP_EPSILON) {
+							scale_factor = drag_to_local.length() / start_distance;
+						} else {
+							scale_factor += offset.length() / GIZMO_HANDLE_DISTANCE;
+						}
 						ci_scale *= scale_factor;
+					} else {
+						Size2 scale_factor(1, 1);
+						if (Math::abs(drag_from_local.x) > CMP_EPSILON) {
+							scale_factor.x = drag_to_local.x / drag_from_local.x;
+						} else {
+							scale_factor.x += offset.x / GIZMO_HANDLE_DISTANCE;
+						}
+						if (Math::abs(drag_from_local.y) > CMP_EPSILON) {
+							scale_factor.y = drag_to_local.y / drag_from_local.y;
+						} else {
+							scale_factor.y += offset.y / GIZMO_HANDLE_DISTANCE;
+						}
+						ci_scale *= scale_factor;
+					}
+					for (int axis = 0; axis < 2; axis++) {
+						if (Math::abs(original_scale[axis]) <= CMP_EPSILON) {
+							real_t scale_delta = offset[axis] / GIZMO_HANDLE_DISTANCE;
+							if (uniform) {
+								scale_delta = (drag_to_local.length() - drag_from_local.length()) / GIZMO_HANDLE_DISTANCE;
+							}
+							ci_scale[axis] = original_scale[axis] + scale_delta;
+						}
 					}
 				} else {
 					Size2 scale_factor = Size2(offset.x, -offset.y) / GIZMO_HANDLE_DISTANCE;
 					Size2 parent_scale = parent_xform.get_scale();
 					// Take into account the biggest scale, so all nodes are scaled uniformly.
-					scale_factor *= Size2(1.0 / parent_scale.x, 1.0 / parent_scale.y) / (scale_max / original_scale);
+					for (int axis = 0; axis < 2; axis++) {
+						real_t parent_component = parent_scale[axis];
+						real_t maximum_component = scale_max[axis];
+						real_t original_component = original_scale[axis];
+						if (Math::abs(parent_component) <= CMP_EPSILON) {
+							scale_factor[axis] = 0.0;
+							continue;
+						}
+						scale_factor[axis] /= parent_component;
+						if (Math::abs(maximum_component) > CMP_EPSILON) {
+							if (Math::abs(original_component) > CMP_EPSILON) {
+								scale_factor[axis] *= original_component / maximum_component;
+							} else {
+								scale_factor[axis] *= maximum_component;
+							}
+						}
+					}
 
 					if (drag_type == DRAG_SCALE_X) {
-						if (!local_space && !uniform) {
+						if (!local_space && !uniform && Math::abs(original_scale.x) > CMP_EPSILON) {
 							object_transform.set_origin(Point2());
 							object_transform.scale(Size2(scale_factor.x + 1.0, 1));
 							ci_scale *= object_transform.get_scale();
@@ -364,10 +405,14 @@ bool CanvasItemManipulator::_gui_input_scale(const Ref<InputEvent> &p_event) {
 							ci_scale.x += scale_factor.x;
 						}
 						if (uniform) {
-							ci_scale.y = ci_scale.x * ratio;
+							if (Math::abs(original_scale.x) > CMP_EPSILON) {
+								ci_scale.y = original_scale.y * ci_scale.x / original_scale.x;
+							} else {
+								ci_scale.y = original_scale.y + (ci_scale.x - original_scale.x) * (original_scale.y < 0 ? -1.0 : 1.0);
+							}
 						}
 					} else if (drag_type == DRAG_SCALE_Y) {
-						if (!local_space && !uniform) {
+						if (!local_space && !uniform && Math::abs(original_scale.y) > CMP_EPSILON) {
 							object_transform.set_origin(Point2());
 							object_transform.scale(Size2(1, -scale_factor.y + 1.0));
 							ci_scale *= object_transform.get_scale();
@@ -375,18 +420,23 @@ bool CanvasItemManipulator::_gui_input_scale(const Ref<InputEvent> &p_event) {
 							ci_scale.y -= scale_factor.y;
 						}
 						if (uniform) {
-							ci_scale.x = ci_scale.y / ratio;
+							if (Math::abs(original_scale.y) > CMP_EPSILON) {
+								ci_scale.x = original_scale.x * ci_scale.y / original_scale.y;
+							} else {
+								ci_scale.x = original_scale.x + (ci_scale.y - original_scale.y) * (original_scale.x < 0 ? -1.0 : 1.0);
+							}
 						}
 					}
 				}
 
 				if (snap_scale && !is_ctrl) {
-					if (snap_relative) {
-						ci_scale.x = original_scale.x * (Math::round((ci_scale.x / original_scale.x) / snap_scale_step) * snap_scale_step);
-						ci_scale.y = original_scale.y * (Math::round((ci_scale.y / original_scale.y) / snap_scale_step) * snap_scale_step);
-					} else {
-						ci_scale.x = Math::round(ci_scale.x / snap_scale_step) * snap_scale_step;
-						ci_scale.y = Math::round(ci_scale.y / snap_scale_step) * snap_scale_step;
+					for (int axis = 0; axis < 2; axis++) {
+						if (snap_relative && Math::abs(original_scale[axis]) > CMP_EPSILON) {
+							real_t scale_ratio = ci_scale[axis] / original_scale[axis];
+							ci_scale[axis] = original_scale[axis] * (Math::round(scale_ratio / snap_scale_step) * snap_scale_step);
+						} else {
+							ci_scale[axis] = Math::round(ci_scale[axis] / snap_scale_step) * snap_scale_step;
+						}
 					}
 				}
 
@@ -401,7 +451,13 @@ bool CanvasItemManipulator::_gui_input_scale(const Ref<InputEvent> &p_event) {
 
 				if (using_temp_pivot) {
 					Point2 ci_origin = ci->_edit_get_transform().get_origin();
-					ci->_edit_set_position(ci_origin + (ci_origin - temp_pivot) * ((ci_scale - original_scale) / original_scale));
+					Size2 scale_delta;
+					for (int axis = 0; axis < 2; axis++) {
+						if (Math::abs(original_scale[axis]) > CMP_EPSILON) {
+							scale_delta[axis] = (ci_scale[axis] - original_scale[axis]) / original_scale[axis];
+						}
+					}
+					ci->_edit_set_position(ci_origin + (ci_origin - temp_pivot) * scale_delta);
 				}
 			}
 
